@@ -20,6 +20,5 @@ from route import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('route/', include('route.urls')),
-    path('event/<int:event_id>', views.event_handler, name='event_info')
-]
+    path('event/info_event', views.event_info, name='info_event')]
 

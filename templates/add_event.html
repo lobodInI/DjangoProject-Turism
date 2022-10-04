@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ADD EVENT</title>
+</head>
+<body>
+<form action="add_event" method="POST">
+    {% csrf_token %}
+    <div>
+    <label for="id_route">ID Route</label>
+    <input name="id_route" id="id_route" value="" />
+  </div>
+    <div class="nativeDatePicker">
+      <label for="start_date">Start date:</label>
+      <input type="date" id="start_date" name="start_date" value="2022-09-01">
+      <span class="validity"></span>
+    </div>
+  <div>
+    <label for="price">Price</label>
+    <input name="price" id="price" value="" />
+  </div>
+    <button>Send my greetings</button>
+  </div>
+</form>
+</body>
+</html>

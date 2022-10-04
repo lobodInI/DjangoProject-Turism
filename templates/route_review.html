@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>REVIEW ROUTE</title>
+</head>
+<body>
+<form action="review" method="POST">
+    {% csrf_token %}
+  <div>
+    <label for="id_route">Enter ID Route</label>
+    <input name="id_route" id="id_route" value="" />
+  </div>
+    <button>Show review</button>
+  </div>
+</form>
+</body>
+</html>

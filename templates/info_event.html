@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>INFO EVENT</title>
+</head>
+<body>
+<form action="info_event" method="POST">
+    {% csrf_token %}
+  <div>
+    <label for="id_event">Enter ID Event</label>
+    <input name="id_event" id="id_event" value="" />
+  </div>
+    <button>Show info about event</button>
+  </div>
+</form>
+</body>
+</html>

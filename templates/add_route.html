@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ADD ROUTE</title>
+</head>
+<body>
+<form action="add_route" method="POST">
+    {% csrf_token %}
+    <div>
+    <label for="starting_point">starting_point</label>
+    <select id="starting_point" name="starting_point">
+        {% for place in places_list %}
+        <option value="{{ place }}">{{ place }}</option>
+        {% endfor %}
+    </select>
+  </div>
+    <div>
+    <label for="destination">destination</label>
+    <select id="destination" name="destination">
+        {% for place in places_list %}
+        <option value="{{ place }}">{{ place }}</option>
+        {% endfor %}
+    </select>
+  </div>
+   <div>
+    <label for="country">country</label>
+    <select id="country" name="country">
+        {% for country in country_list %}
+        <option value="{{ country }}">{{ country }}</option>
+        {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="location">location</label>
+    <input name="location" id="location" value="" />
+  </div>
+  <div>
+    <label for="description">description</label>
+    <input name="description" id="description" value="" />
+  </div>
+    <div>
+    <label for="duration">duration</label>
+    <select id="duration" name="duration">
+        {% for day in limit_duration %}
+        <option value="{{ day }}">{{ day }}</option>
+        {% endfor %}
+    </select>
+  </div>
+    <div>
+    <label for="route_type">route_type</label>
+    <select id="route_type" name="route_type">
+        <option value="Foot">Foot</option>
+        <option value="Car">Car</option>
+        <option value="Bike">Bike</option>
+    </select>
+  </div>
+    <button>Route add-on</button>
+  </div>
+</form>
+</body>
+</html>

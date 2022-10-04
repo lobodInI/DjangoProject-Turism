@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy
 
 class Places(models.Model):
     name = models.CharField(max_length=50)
+    name_country = models.CharField(max_length=50, null=False)
 
 
 class Route(models.Model):
@@ -36,3 +37,8 @@ class Event(models.Model):
     start_date = models.DateField()
     price = models.IntegerField()
 
+
+class Review(models.Model):
+    route_id = models.IntegerField()
+    review_text = models.TextField()
+    review_rate = models.IntegerField()
