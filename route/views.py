@@ -1,7 +1,9 @@
+from datetime import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.db import connection
 from route import models
 
 
@@ -14,23 +16,48 @@ def route_filter(request):
         return render(request, 'route_filter.html', {'country_list': country_list})
 
     if request.method == 'POST':
-        query_filter = {'route_type': request.POST.get('route_type')}
-        if request.POST.get('country') != 'ALL':
-            query_filter['country'] = request.POST.get('country')
-        if request.POST.get('location') != '':
-            query_filter['location'] = request.POST.get('location')
+        cursor = connection.cursor()
+        query_filter = []
 
-        result = models.Route.objects.all().filter(**query_filter)
-        if result:
-            return HttpResponse([{'id': i.id,
-                                  'starting_point': i.starting_point,
-                                  'stopping_point': i.stopping_point,
-                                  'destination': i.destination,
-                                  'country': i.country,
-                                  'location': i.location,
-                                  'description': i.description,
-                                  'duration': i.duration,
-                                  'route_type': i.route_type} for i in result])
+        if request.POST.get('route_type') != 'ALL':
+            query_filter.append(f"route_type='{request.POST.get('route_type')}'")
+        if request.POST.get('country') != 'ALL':
+            query_filter.append(f"country='{request.POST.get('country')}'")
+        if request.POST.get('location') != '':
+            query_filter.append(f"location='{request.POST.get('location')}'")
+
+        if query_filter:
+            filter_str = f" WHERE {' and '.join(query_filter)}"
+        else:
+            filter_str = ""
+
+        sql_query = """SELECT   route_route.country,
+                                route_route.description,
+                                route_route.duration,
+                                route_route.stopping_point,
+                                route_route.route_type,
+                                start_point.name,
+                                end_point.name
+                        FROM route_route
+                            JOIN route_places as start_point
+                                ON start_point.id == route_route.starting_point
+                            JOIN route_places as end_point
+                                ON end_point.id == route_route.destination"""
+
+        cursor.execute(sql_query + filter_str)
+
+        result_query = cursor.fetchall()
+
+        if result_query:
+            list_route = [{"Country": i[0],
+                           "Description": i[1],
+                           "Duration route": i[2],
+                           "Stopping point": i[3],
+                           "Route type": i[4],
+                           "Start point": i[5],
+                           "End point": i[6]} for i in result_query]
+
+            return HttpResponse(list_route)
         else:
             return HttpResponse('Routes not found')
 
@@ -40,44 +67,58 @@ def route_info(request):
         return render(request, 'info_route.html')
 
     if request.method == 'POST':
-        result = models.Route.objects.all().filter(id=request.POST.get('id_route'))
-        if result:
+        actual_date = datetime.now().strftime('%Y-%m-%d')
+        cursor = connection.cursor()
 
-            route_events = models.Event.objects.all().filter(id_route=request.POST.get('id_route'))
-            if route_events:
-                return HttpResponse([{'INFO ABOUT ROUTE': {'id': i.id,
-                                                           'starting_point': i.starting_point,
-                                                           'stopping_point': i.stopping_point,
-                                                           'destination': i.destination,
-                                                           'country': i.country,
-                                                           'location': i.location,
-                                                           'description': i.description,
-                                                           'duration': i.duration,
-                                                           'route_type': i.route_type} for i in result},
-                                     {'ROUTE EVENTS': {'id': i.id,
-                                                       'id_route': i.id_route,
-                                                       'event_admin': i.event_admin,
-                                                       'approved_users': i.approved_users,
-                                                       'pending_users': i.pending_users,
-                                                       'start_date': i.start_date,
-                                                       'price': i.price} for i in route_events},
-                                     '<a href="add_event" >ADD NEW EVENT</a>'])
+        sql_query_route = f"""SELECT  route_route.country,
+                                route_route.description,
+                                route_route.duration,
+                                route_route.stopping_point,
+                                route_route.route_type,
+                                start_point.name,
+                                end_point.name
+                        FROM route_route
+                            JOIN route_places as start_point
+                                ON start_point.id == route_route.starting_point
+                            JOIN route_places as end_point
+                                ON end_point.id == route_route.destination
+                            WHERE route_route.id == '{request.POST.get('id_route')}'"""
+
+        cursor.execute(sql_query_route)
+        result_query_route = cursor.fetchall()
+        if result_query_route:
+            select_route = [{"Country": i[0],
+                             "Description": i[1],
+                             "Duration": i[2],
+                             "Stopping point": i[3],
+                             "Route type": i[4],
+                             "Start point": i[5],
+                             "End point": i[6]} for i in result_query_route]
+
+            sql_query_event = f"""SELECT event.id,
+                                         event.start_date,
+                                         event.price
+                                  FROM route_event as event
+                                      JOIN route_route as route
+                                        ON route.id == event.id_route
+                                  WHERE route.id == '{request.POST.get('id_route')}' 
+                                        and event.start_date >= '{actual_date}'"""
+
+            cursor.execute(sql_query_event)
+            result_query_route_event = cursor.fetchall()
+            if result_query_route_event:
+                travel_events = [{'ID Event': i[0],
+                                  'Date start event': i[1],
+                                  'Price event': i[2]} for i in result_query_route_event]
+
+                return HttpResponse([select_route, travel_events, '<br><a href="info_event" >SELECT  EVENT</a>',
+                                                                  '<br><a href="add_event" >ADD NEW EVENT</a>'])
 
             else:
-                return HttpResponse([{'INFO ABOUT ROUTE': {'id': i.id,
-                                                           'starting_point': i.starting_point,
-                                                           'stopping_point': i.stopping_point,
-                                                           'destination': i.destination,
-                                                           'country': i.country,
-                                                           'location': i.location,
-                                                           'description': i.description,
-                                                           'duration': i.duration,
-                                                           'route_type': i.route_type} for i in result},
-                                     {'ROUTE EVENTS': 'NOT FOUND INFORMATION ABOUT ROUTE EVENT'},
-                                     '<a href="add_event" >ADD NEW EVENT</a>'])
+                return HttpResponse([select_route, '<br><a href="add_event" >ADD NEW EVENT</a>'])
 
         else:
-            return HttpResponse('Not found route')
+            return HttpResponse('Route not found')
 
 
 def route_add(request):
@@ -159,17 +200,43 @@ def event_info(request):
         return render(request, 'info_event.html')
 
     if request.method == 'POST':
-        result = models.Event.objects.all().filter(id=request.POST.get('id_event'))
+        cursor = connection.cursor()
+        sql_query = f"""SELECT  event.id,
+                               event.start_date,
+                               event.price,
+                               route.country,
+                               route.location,
+                               route.stopping_point,
+                               place.name_country,
+                               place.name,
+                               route.duration,
+                               route.route_type
+
+                        FROM route_event as event
+                            JOIN route_route as route
+                                ON event.id_route == route.id
+                            JOIN route_places as place
+                                ON route.destination == place.id
+                            WHERE event.id == '{request.POST.get('id_event')}'"""
+
+        cursor.execute(sql_query)
+        result = cursor.fetchall()
         if result:
-            return HttpResponse([{'id': i.id,
-                                  'id_route': i.id_route,
-                                  'event_admin': i.event_admin,
-                                  'approved_users': i.approved_users,
-                                  'pending_users': i.pending_users,
-                                  'start_date': i.start_date,
-                                  'price': i.price} for i in result])
+            list_event = [{'ID event': i[0],
+                           'Date start event': i[1],
+                           'Price': i[2],
+                           'Country start': i[3],
+                           'Start point': i[4],
+                           'Stopping point': i[5],
+                           'Country end': i[6],
+                           'End point': i[7],
+                           'Duration event': i[8],
+                           'Route type': i[9]} for i in result]
+
+            return HttpResponse(list_event)
+
         else:
-            return HttpResponse('Not found event')
+            return HttpResponse('Event not found')
 
 
 def user_authorization(request):

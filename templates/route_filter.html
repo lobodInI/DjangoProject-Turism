@@ -8,7 +8,7 @@
 <form action="" method="POST">
     {% csrf_token %}
    <div>
-    <label for="country">country</label>
+    <label for="country">Country</label>
     <select id="country" name="country">
         {% for country in country_list %}
         <option value="{{ country }}">{{ country }}</option>
@@ -16,12 +16,13 @@
     </select>
   </div>
   <div>
-    <label for="location">location</label>
+    <label for="location">Start location</label>
     <input name="location" id="location" value="" />
   </div>
     <div>
-    <label for="route_type">route_type</label>
+    <label for="route_type">Route type</label>
     <select id="route_type" name="route_type">
+        <option value="ALL">ALL</option>
         <option value="Foot">Foot</option>
         <option value="Car">Car</option>
         <option value="Bike">Bike</option>
