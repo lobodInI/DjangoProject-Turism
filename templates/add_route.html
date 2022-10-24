@@ -8,7 +8,7 @@
 <form action="add_route" method="POST">
     {% csrf_token %}
     <div>
-    <label for="starting_point">starting_point</label>
+    <label for="starting_point">Starting point</label>
     <select id="starting_point" name="starting_point">
         {% for place in places_list %}
         <option value="{{ place }}">{{ place }}</option>
@@ -16,7 +16,7 @@
     </select>
   </div>
     <div>
-    <label for="destination">destination</label>
+    <label for="destination">Destination</label>
     <select id="destination" name="destination">
         {% for place in places_list %}
         <option value="{{ place }}">{{ place }}</option>
@@ -24,23 +24,27 @@
     </select>
   </div>
    <div>
-    <label for="country">country</label>
+    <label for="country">Country</label>
     <select id="country" name="country">
         {% for country in country_list %}
         <option value="{{ country }}">{{ country }}</option>
         {% endfor %}
     </select>
   </div>
+ <div>
+    <label for="stopping_point">Stopping point</label>
+    <textarea name="stopping_point" id="stopping_point" rows="5"  cols="49">[{"name": " ", "latitude": " ", "longitude": " "}]</textarea>
+  </div>
   <div>
-    <label for="location">location</label>
+    <label for="location">Location</label>
     <input name="location" id="location" value="" />
   </div>
   <div>
-    <label for="description">description</label>
+    <label for="description">Description</label>
     <input name="description" id="description" value="" />
   </div>
     <div>
-    <label for="duration">duration</label>
+    <label for="duration">Duration</label>
     <select id="duration" name="duration">
         {% for day in limit_duration %}
         <option value="{{ day }}">{{ day }}</option>
@@ -48,7 +52,7 @@
     </select>
   </div>
     <div>
-    <label for="route_type">route_type</label>
+    <label for="route_type">Route type</label>
     <select id="route_type" name="route_type">
         <option value="Foot">Foot</option>
         <option value="Car">Car</option>

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -5,6 +6,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import connection
 from route import models
+from mongo_utils import MongoDBConnection
+from bson import ObjectId
 
 
 def route_filter(request):
@@ -37,7 +40,8 @@ def route_filter(request):
                                 route_route.stopping_point,
                                 route_route.route_type,
                                 start_point.name,
-                                end_point.name
+                                end_point.name,
+                                route_route.id
                         FROM route_route
                             JOIN route_places as start_point
                                 ON start_point.id == route_route.starting_point
@@ -55,9 +59,10 @@ def route_filter(request):
                            "Stopping point": i[3],
                            "Route type": i[4],
                            "Start point": i[5],
-                           "End point": i[6]} for i in result_query]
+                           "End point": i[6],
+                           "ID Route": i[7]} for i in result_query]
 
-            return HttpResponse(list_route)
+            return HttpResponse([list_route, '<br><a href="info_route" >SELECT ROUTE INFORMATION</a>'])
         else:
             return HttpResponse('Routes not found')
 
@@ -95,6 +100,12 @@ def route_info(request):
                              "Start point": i[5],
                              "End point": i[6]} for i in result_query_route]
 
+            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+                collection = db['Stopping point']
+                stopping_point = collection.find_one({'_id': ObjectId(select_route[0]['Stopping point'])})
+
+            select_route[0]['Stopping point'] = stopping_point['points']  # замінюємо ІД зупинок на повну інформацію
+
             sql_query_event = f"""SELECT event.id,
                                          event.start_date,
                                          event.price
@@ -130,6 +141,7 @@ def route_add(request):
             for itm in range(len(place_objs)):
                 places_list.append(place_objs[itm].name)
                 country_list.add(place_objs[itm].name_country)
+            country_list.remove('ALL')                         # в створенні маршруту ALL не має бути
             return render(request, 'add_route.html', {'places_list': places_list,
                                                       'country_list': country_list,
                                                       'limit_duration': range(1, 11)})
@@ -138,15 +150,22 @@ def route_add(request):
             starting_point = request.POST.get('starting_point')
             destination = request.POST.get('destination')
             country = request.POST.get('country')
+            stopping_point = request.POST.get('stopping_point')
             location = request.POST.get('location')
             description = request.POST.get('description')
             duration = request.POST.get('duration')
             route_type = request.POST.get('route_type')
 
+            stopping_list = json.loads(stopping_point)
+
+            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+                collection = db['Stopping point']
+                id_stopping_point = collection.insert_one({"points": stopping_list}).inserted_id
+
             start_obj = models.Places.objects.get(name=starting_point)
             destination_obj = models.Places.objects.get(name=destination)
             new_route = models.Route(starting_point=start_obj.id,
-                                     stopping_point={},
+                                     stopping_point=id_stopping_point,
                                      destination=destination_obj.id,
                                      country=country,
                                      location=location,
@@ -210,7 +229,8 @@ def event_info(request):
                                place.name_country,
                                place.name,
                                route.duration,
-                               route.route_type
+                               route.route_type,
+                               event.event_users
 
                         FROM route_event as event
                             JOIN route_route as route
@@ -231,7 +251,23 @@ def event_info(request):
                            'Country end': i[6],
                            'End point': i[7],
                            'Duration event': i[8],
-                           'Route type': i[9]} for i in result]
+                           'Route type': i[9],
+                           'Event users': i[10]} for i in result]
+
+            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+                collection_point = db['Stopping point']
+                stopping_point = collection_point.find_one({'_id': ObjectId(list_event[0]['Stopping point'])})
+
+                collection_user = db['event_users']
+                id_event_users = collection_user.find_one({"_id": ObjectId(list_event[0]['Event users'])})
+
+            list_event[0]['Stopping point'] = stopping_point['points']  # замінюємо ІД зупинок на повну інформацію
+
+            users_accepted = User.objects.filter(pk__in=id_event_users['accepted'])
+            users_pending = User.objects.filter(pk__in=id_event_users['pending'])
+
+            list_event[0]['Accepted users'] = [{f"ID {i.id}": i.username for i in users_accepted}]
+            list_event[0]['Pending users'] = [{f"ID {i.id}": i.username for i in users_pending}]
 
             return HttpResponse(list_event)
 
@@ -279,3 +315,53 @@ def user_registration(request):
 def logout_user(request):
     logout(request)
     return redirect('/login')
+
+
+def add_me_to_event(request, id_event):
+    user = request.user.id
+    event = models.Event.objects.filter(id=id_event).first()
+
+    with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+        event_users = db['event_users']
+        all_event_user = event_users.find_one({"_id": ObjectId(event.event_users)})
+
+        if user in all_event_user['pending'] or user in all_event_user['accepted']:
+            return HttpResponse('You are in pending/accepted users')
+        else:
+            all_event_user['pending'].append(user)
+            event_users.update_one({"_id": ObjectId(event.event_users)}, {"$set": all_event_user}, upsert=False)
+
+        return HttpResponse('Excellent. You have added yourself to the event. Wait for confirmation')
+
+
+def event_accept_user(request, id_event):
+    if request.method == "GET":
+        if request.user.is_superuser:
+            event = models.Event.objects.filter(id=id_event).first()
+
+            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+                collection = db['event_users']
+                all_event_user = collection.find_one({'_id': ObjectId(event.event_users)})
+
+            return render(request, "user_confirmation.html", {"pending_users": all_event_user['pending']})
+        else:
+            return HttpResponse("Not allowed to event handling")
+
+    if request.method == "POST":
+        if request.POST.get("selected_id_user") is not None:
+
+            event = models.Event.objects.filter(id=id_event).first()
+            selected_user = int(request.POST.get("selected_id_user"))
+
+            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+                collection = db['event_users']
+                all_event_user = collection.find_one({"_id": ObjectId(event.event_users)})
+
+                all_event_user["pending"].remove(selected_user)
+                all_event_user["accepted"].append(selected_user)
+
+                collection.update_one({"_id": ObjectId(event.event_users)}, {"$set": all_event_user}, upsert=False)
+
+            return HttpResponse(f'User with ID : {selected_user} is accepted')
+        else:
+            return HttpResponse('No users selected./No pending users in the event')

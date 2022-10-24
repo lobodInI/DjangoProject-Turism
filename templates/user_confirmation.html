@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QUERY PROCESSING</title>
+</head>
+<body>
+<form action="accept_user" method="POST">
+    {% csrf_token %}
+   <div>
+    <label for="selected_id_user">Select ID user for accepted</label>
+    <select id="selected_id_user" name="selected_id_user">
+        {% for id_user in pending_users %}
+        <option value="{{ id_user }}">{{ id_user }}</option>
+        {% endfor %}
+    </select>
+  </div>
+  </div>
+    <button>Press to confirm</button>
+  </div>
+</form>
+</body>
+</html>
