@@ -2,6 +2,8 @@ import json
 from datetime import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import connection
@@ -62,7 +64,18 @@ def route_filter(request):
                            "End point": i[6],
                            "ID Route": i[7]} for i in result_query]
 
-            return HttpResponse([list_route, '<br><a href="info_route" >SELECT ROUTE INFORMATION</a>'])
+            p = Paginator(list_route, 2)
+            try:
+                num_page = int(request.POST.get('page', default=1))
+            except ValueError:
+                return HttpResponse('Fatal error. The page number must be an integer')
+
+            if num_page > p.num_pages:
+                num_page = 1
+            select_page = p.get_page(num_page)
+
+            return HttpResponse([select_page.object_list, f"<br>Number page: {num_page}",
+                                 '<br><a href="info_route" >SELECT ROUTE INFORMATION</a>'])
         else:
             return HttpResponse('Routes not found')
 
@@ -206,9 +219,13 @@ def route_add_event(request):
                                      start_date=start_date,
                                      price=price,
                                      event_admin=1,
-                                     approved_users={},
-                                     pending_users={})
-            new_event.save()
+                                     event_users={})
+            try:
+                new_event.full_clean()
+                new_event.save()
+            except ValidationError:
+                return HttpResponse('Check correct date or/and check price')
+
             return HttpResponse('Event added')
     else:
         return HttpResponse('Not allowed to add event')

@@ -24,14 +24,13 @@ class MongoDBConnection:
 
 
 if __name__ == '__main__':
-    pass
-    # with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
-    #     collection = db['Stopping point']
-    #     collection.insert_one({'points': [{'name': f"{uuid.uuid4()}",
-    #                                        'lat': random.randint(0, 500), 'lon': random.randint(0, 500)},
-    #                                       {'name': f"{uuid.uuid4()}",
-    #                                        'lat': random.randint(0, 500), 'lon': random.randint(0, 500)}
-    #                                       ]})
-    #
-    #     collection = db['event_users']
-    #     collection.insert_one({"pending": [2, 3, 1], "accepted": [4, 5]})
+    with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+        collection = db['Stopping point']
+        collection.insert_one({'points': [{'name': f"{uuid.uuid4()}",
+                                           'lat': random.randint(0, 500), 'lon': random.randint(0, 500)},
+                                          {'name': f"{uuid.uuid4()}",
+                                           'lat': random.randint(0, 500), 'lon': random.randint(0, 500)}
+                                          ]})
+
+        # collection = db['event_users']
+        # collection.insert_one({"pending": [2, 3, 1], "accepted": [4, 5]})

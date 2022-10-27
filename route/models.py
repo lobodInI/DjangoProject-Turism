@@ -1,3 +1,4 @@
+import validators
 from django.db import models
 from django.utils.translation import gettext_lazy
 
@@ -32,8 +33,8 @@ class Event(models.Model):
     id_route = models.IntegerField()
     event_admin = models.IntegerField()
     event_users = models.CharField(max_length=50, null=True)
-    start_date = models.DateField()
-    price = models.IntegerField()
+    start_date = models.DateField(validators=[validators.validate_event_date])
+    price = models.IntegerField(validators=[validators.validate_event_price])
 
 
 class Review(models.Model):
