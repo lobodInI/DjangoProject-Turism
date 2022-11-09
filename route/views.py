@@ -1,5 +1,8 @@
+import os
 import json
+
 from datetime import datetime
+from bson import ObjectId
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -7,9 +10,8 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import connection
+from utils.mongo_utils import MongoDBConnection
 from route import models
-from mongo_utils import MongoDBConnection
-from bson import ObjectId
 
 
 def route_filter(request):
@@ -68,7 +70,7 @@ def route_filter(request):
             try:
                 num_page = int(request.POST.get('page', default=1))
             except ValueError:
-                return HttpResponse('Fatal error. The page number must be an integer')
+                return HttpResponse('Fatal error. The page number must be an integer', status=404)
 
             if num_page > p.num_pages:
                 num_page = 1
@@ -77,7 +79,7 @@ def route_filter(request):
             return HttpResponse([select_page.object_list, f"<br>Number page: {num_page}",
                                  '<br><a href="info_route" >SELECT ROUTE INFORMATION</a>'])
         else:
-            return HttpResponse('Routes not found')
+            return HttpResponse('Routes not found', status=404)
 
 
 def route_info(request):
@@ -113,11 +115,12 @@ def route_info(request):
                              "Start point": i[5],
                              "End point": i[6]} for i in result_query_route]
 
-            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+            with MongoDBConnection(os.environ.get('DB_USERNAME'), os.environ.get('DB_PASSWORD'),
+                                   os.environ.get('DB_HOST')) as db:
                 collection = db['Stopping point']
                 stopping_point = collection.find_one({'_id': ObjectId(select_route[0]['Stopping point'])})
 
-            select_route[0]['Stopping point'] = stopping_point['points']  # замінюємо ІД зупинок на повну інформацію
+            #select_route[0]['Stopping point'] = stopping_point['points']  # замінюємо ІД зупинок на повну інформацію
 
             sql_query_event = f"""SELECT event.id,
                                          event.start_date,
@@ -136,13 +139,14 @@ def route_info(request):
                                   'Price event': i[2]} for i in result_query_route_event]
 
                 return HttpResponse([select_route, travel_events, '<br><a href="info_event" >SELECT  EVENT</a>',
-                                                                  '<br><a href="add_event" >ADD NEW EVENT</a>'])
+                                                                  '<br><a href="add_event" >ADD NEW EVENT</a>'],
+                                    stopping_point)
 
             else:
                 return HttpResponse([select_route, '<br><a href="add_event" >ADD NEW EVENT</a>'])
 
         else:
-            return HttpResponse('Route not found')
+            return HttpResponse('Route not found', status=404)
 
 
 def route_add(request):
@@ -154,7 +158,7 @@ def route_add(request):
             for itm in range(len(place_objs)):
                 places_list.append(place_objs[itm].name)
                 country_list.add(place_objs[itm].name_country)
-            country_list.remove('ALL')                         # в створенні маршруту ALL не має бути
+            country_list.remove('ALL')  # в створенні маршруту ALL не має бути
             return render(request, 'add_route.html', {'places_list': places_list,
                                                       'country_list': country_list,
                                                       'limit_duration': range(1, 11)})
@@ -171,7 +175,8 @@ def route_add(request):
 
             stopping_list = json.loads(stopping_point)
 
-            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+            with MongoDBConnection(os.environ.get('DB_USERNAME'), os.environ.get('DB_PASSWORD'),
+                                   os.environ.get('DB_HOST')) as db:
                 collection = db['Stopping point']
                 id_stopping_point = collection.insert_one({"points": stopping_list}).inserted_id
 
@@ -193,7 +198,7 @@ def route_add(request):
 
 def route_reviews(request):
     if request.method == 'GET':
-        return render(request, 'route_review.html')
+        return render(request, 'route_show_review.html')
 
     if request.method == 'POST':
         result = models.Review.objects.all().filter(route_id=request.POST.get('id_route'))
@@ -202,7 +207,31 @@ def route_reviews(request):
                                   'review_text': i.review_text,
                                   'review_rate': i.review_rate} for i in result])
         else:
-            return HttpResponse('Not found reviews')
+            return HttpResponse('Not found reviews', status=404)
+
+
+def route_add_review(request):
+    if request.user.is_authenticated:
+        if request.method == 'GET':
+            all_id_route = []
+            route_objs = models.Route.objects.all()
+            for itm in range(len(route_objs)):
+                all_id_route.append(route_objs[itm].id)
+            return render(request, 'route_review_add.html', {"all_id_route": all_id_route,
+                                                             'rating_range': range(1, 11)})
+
+        if request.method == 'POST':
+            id_route = request.POST.get('id_route')
+            user_review = request.POST.get('user_review')
+            user_rating = request.POST.get('user_rating')
+
+            new_review = models.Review(route_id=id_route,
+                                       review_text=user_review,
+                                       review_rate=user_rating)
+            new_review.save()
+            return HttpResponse("Thanks for feedback. Review added")
+    else:
+        return HttpResponse('You are not authorized', status=401)
 
 
 def route_add_event(request):
@@ -228,7 +257,7 @@ def route_add_event(request):
 
             return HttpResponse('Event added')
     else:
-        return HttpResponse('Not allowed to add event')
+        return HttpResponse('Not allowed to add event', status=401)
 
 
 def event_info(request):
@@ -271,7 +300,8 @@ def event_info(request):
                            'Route type': i[9],
                            'Event users': i[10]} for i in result]
 
-            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+            with MongoDBConnection(os.environ.get('DB_USERNAME'), os.environ.get('DB_PASSWORD'),
+                                   os.environ.get('DB_HOST')) as db:
                 collection_point = db['Stopping point']
                 stopping_point = collection_point.find_one({'_id': ObjectId(list_event[0]['Stopping point'])})
 
@@ -309,7 +339,7 @@ def user_authorization(request):
                                     '<br><a href="login" > Try again </a>'
                                     '<br><a href="registration" > Register new user </a>')
     else:
-        return HttpResponse('<a href="logout" > Logout</a>')
+        return HttpResponse('<a href="logout" > Logout</a>', )
 
 
 def user_registration(request):
@@ -338,7 +368,8 @@ def add_me_to_event(request, id_event):
     user = request.user.id
     event = models.Event.objects.filter(id=id_event).first()
 
-    with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+    with MongoDBConnection(os.environ.get('DB_USERNAME'), os.environ.get('DB_PASSWORD'),
+                           os.environ.get('DB_HOST')) as db:
         event_users = db['event_users']
         all_event_user = event_users.find_one({"_id": ObjectId(event.event_users)})
 
@@ -356,7 +387,8 @@ def event_accept_user(request, id_event):
         if request.user.is_superuser:
             event = models.Event.objects.filter(id=id_event).first()
 
-            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+            with MongoDBConnection(os.environ.get('DB_USERNAME'), os.environ.get('DB_PASSWORD'),
+                                   os.environ.get('DB_HOST')) as db:
                 collection = db['event_users']
                 all_event_user = collection.find_one({'_id': ObjectId(event.event_users)})
 
@@ -370,7 +402,8 @@ def event_accept_user(request, id_event):
             event = models.Event.objects.filter(id=id_event).first()
             selected_user = int(request.POST.get("selected_id_user"))
 
-            with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+            with MongoDBConnection(os.environ.get('DB_USERNAME'), os.environ.get('DB_PASSWORD'),
+                                   os.environ.get('DB_HOST')) as db:
                 collection = db['event_users']
                 all_event_user = collection.find_one({"_id": ObjectId(event.event_users)})
 

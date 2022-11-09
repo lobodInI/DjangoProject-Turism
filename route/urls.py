@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.route_filter, name='show_filter_route'),
     path('info_route', views.route_info, name='info_route'),
     path('review', views.route_reviews, name='route_review'),
+    path('review/add', views.route_add_review, name='route_review_add'),
     path('add_route', views.route_add, name='add_route'),
     path('add_event', views.route_add_event, name='add_event'),
     path('info_event', views.event_info, name='info_event'),

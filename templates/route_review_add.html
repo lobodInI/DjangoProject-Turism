@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ADD REVIEW</title>
+</head>
+<body>
+<form action="review_add" method="POST">
+    {% csrf_token %}
+   <div>
+    <label for="id_route">Select ID Route</label>
+    <select id="id_route" name="id_route">
+        {% for id in all_id_route %}
+        <option value="{{ id }}">{{ id }}</option>
+        {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="user_review">Your review</label>
+    <input name="user_review" id="user_review"
+           placeholder="Write your impressions"/>
+  </div>
+    <div>
+    <label for="user_rating">Your rating</label>
+    <select id="user_rating" name="user_rating">
+        {% for number in rating_range %}
+        <option value="{{ number }}">{{ number }}</option>
+        {% endfor %}
+    </select>
+  </div>
+    <button>Provide feedback</button>
+  </div>
+</form>
+</body>
+</html>

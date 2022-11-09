@@ -1,3 +1,4 @@
+import os
 import random
 import uuid
 
@@ -24,7 +25,8 @@ class MongoDBConnection:
 
 
 if __name__ == '__main__':
-    with MongoDBConnection('admin', 'admin', '127.0.0.1') as db:
+    with MongoDBConnection(os.environ.get('DB_USERNAME'), os.environ.get('DB_PASSWORD'),
+                           os.environ.get('DB_HOST')) as db:
         collection = db['Stopping point']
         collection.insert_one({'points': [{'name': f"{uuid.uuid4()}",
                                            'lat': random.randint(0, 500), 'lon': random.randint(0, 500)},
