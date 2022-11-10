@@ -120,7 +120,7 @@ def route_info(request):
                 collection = db['Stopping point']
                 stopping_point = collection.find_one({'_id': ObjectId(select_route[0]['Stopping point'])})
 
-            #select_route[0]['Stopping point'] = stopping_point['points']  # замінюємо ІД зупинок на повну інформацію
+            select_route[0]['Stopping point'] = stopping_point['points']  # замінюємо ІД зупинок на повну інформацію
 
             sql_query_event = f"""SELECT event.id,
                                          event.start_date,
@@ -319,7 +319,7 @@ def event_info(request):
             return HttpResponse(list_event)
 
         else:
-            return HttpResponse('Event not found')
+            return HttpResponse('Event not found', status=404)
 
 
 def user_authorization(request):

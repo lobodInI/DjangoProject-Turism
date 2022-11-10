@@ -1,13 +1,13 @@
 import route.models
 from django.test import TestCase, Client, RequestFactory
-from route.views import route_add_event, route_add_review, route_info
+from route.views import route_add_event, route_add_review, route_info, event_info
 from django.contrib.auth.models import User
 from unittest.mock import patch
 
 
 class CollectionMock:
     def find_one(self, *args, **kwargs):
-        return {}
+        return {'points': [], 'accepted': [], 'pending': []}
 
 
 class ClientMongoMock:
@@ -18,10 +18,8 @@ class ClientMongoMock:
         pass
 
     def __getitem__(self, item):
-        return {'Stopping point': CollectionMock()}
-
-
-mocked_client = ClientMongoMock()
+        return {'Stopping point': CollectionMock(),
+                'event_users': CollectionMock()}
 
 
 class TestRoute(TestCase):
@@ -127,6 +125,9 @@ class TestRoute(TestCase):
         response_post = client.post('/route/review', {'id_route': 5})
         result_2 = response_post.status_code
         self.assertEqual(200, result_2)
+        find_items = list(route.models.Review.objects.all().filter(review_text='Perfect travel'))
+        result_find = find_items[0].route_id
+        self.assertEqual(5, result_find)
 
     def test_add_review_anonim_user(self):
         client = Client()
@@ -190,3 +191,26 @@ class TestEvent(TestCase):
         find_items = list(route.models.Event.objects.all().filter(price=1111))
         result_2 = find_items[0].id_route
         self.assertEqual(10, result_2)
+
+
+class TestEventFixtures(TestCase):
+    fixtures = ['route.json']
+
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_event_info_get(self):
+        request = self.factory.get('/route/info_event')
+        response_get = event_info(request)
+        result_get = response_get.status_code
+        self.assertEqual(200, result_get)
+
+    @patch('utils.mongo_utils.MongoClient', ClientMongoMock)
+    def test_event_info_post(self):
+        request = self.factory.post('/route/info_event', data={'id_event': 1})
+        response_post = event_info(request)
+        result_post_1 = response_post.status_code
+        self.assertEqual(200, result_post_1)
+        find_items = list(route.models.Event.objects.all().filter(id=1))
+        result_post_2 = len(find_items)
+        self.assertEqual(1, result_post_2)
