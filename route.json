@@ -1,0 +1,450 @@
+[
+{
+    "model": "route.places",
+    "pk": 0,
+    "fields": {
+        "name": " ",
+        "name_country": "ALL"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 1,
+    "fields": {
+        "name": "Kyiv",
+        "name_country": "Ukraine"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 2,
+    "fields": {
+        "name": "Lviv",
+        "name_country": "Ukraine"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 3,
+    "fields": {
+        "name": "Odesa",
+        "name_country": "Ukraine"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 4,
+    "fields": {
+        "name": "Warsaw",
+        "name_country": "Poland"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 5,
+    "fields": {
+        "name": "Hamburg",
+        "name_country": "Germany"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 6,
+    "fields": {
+        "name": "Paris",
+        "name_country": "France"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 7,
+    "fields": {
+        "name": "Rome",
+        "name_country": "Italy"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 8,
+    "fields": {
+        "name": "London",
+        "name_country": "Great Britain"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 9,
+    "fields": {
+        "name": "Madrid",
+        "name_country": "Spain"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 10,
+    "fields": {
+        "name": "Lisbon",
+        "name_country": "Portugal"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 11,
+    "fields": {
+        "name": "Bucharest",
+        "name_country": "Romania"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 12,
+    "fields": {
+        "name": "Budapest",
+        "name_country": "Hungary"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 13,
+    "fields": {
+        "name": "Riga",
+        "name_country": "Latvia"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 14,
+    "fields": {
+        "name": "Tallin",
+        "name_country": "Estonia"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 15,
+    "fields": {
+        "name": "Vilnius",
+        "name_country": "Lithuania"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 16,
+    "fields": {
+        "name": "Helsinki",
+        "name_country": "Finland"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 17,
+    "fields": {
+        "name": "Stockholm",
+        "name_country": "Sweden"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 18,
+    "fields": {
+        "name": "Oslo",
+        "name_country": "Norway"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 101,
+    "fields": {
+        "name": "Friuli-Venezia Giulia",
+        "name_country": "Italy"
+    }
+},
+{
+    "model": "route.places",
+    "pk": 112,
+    "fields": {
+        "name": "Palermo",
+        "name_country": "Italy"
+    }
+},
+{
+    "model": "route.route",
+    "pk": 1,
+    "fields": {
+        "starting_point": 101,
+        "stopping_point": "635308f8ccadbe4c95c1ed16",
+        "destination": 112,
+        "country": "Italy",
+        "location": "Friuli-Venezia Giulia",
+        "description": "exciting journey",
+        "duration": 1,
+        "route_type": "Car"
+    }
+},
+{
+    "model": "route.route",
+    "pk": 2,
+    "fields": {
+        "starting_point": 6,
+        "stopping_point": "63530acb25a19ae3f90f98aa",
+        "destination": 7,
+        "country": "France",
+        "location": "Paris",
+        "description": "cabriolet ride",
+        "duration": 2,
+        "route_type": "Car"
+    }
+},
+{
+    "model": "route.route",
+    "pk": 3,
+    "fields": {
+        "starting_point": 1,
+        "stopping_point": "63530acef9a1e9cc08ea66b6",
+        "destination": 3,
+        "country": "Ukraine",
+        "location": "Kyiv",
+        "description": ".............",
+        "duration": 1,
+        "route_type": "Car"
+    }
+},
+{
+    "model": "route.route",
+    "pk": 4,
+    "fields": {
+        "starting_point": 2,
+        "stopping_point": "63530ad0553762c93576e870",
+        "destination": 5,
+        "country": "Ukraine",
+        "location": "Lviv",
+        "description": "strange weather conditions",
+        "duration": 3,
+        "route_type": "Car"
+    }
+},
+{
+    "model": "route.route",
+    "pk": 5,
+    "fields": {
+        "starting_point": 3,
+        "stopping_point": "63530ad281614d0e99bc1738",
+        "destination": 2,
+        "country": "Ukraine",
+        "location": "Odesa",
+        "description": "happy travel",
+        "duration": 5,
+        "route_type": "Bike"
+    }
+},
+{
+    "model": "route.route",
+    "pk": 6,
+    "fields": {
+        "starting_point": 8,
+        "stopping_point": "63530ad3e862cf13010e83a0",
+        "destination": 6,
+        "country": "Great Britain",
+        "location": "London",
+        "description": "happy travel",
+        "duration": 10,
+        "route_type": "Foot"
+    }
+},
+{
+    "model": "route.route",
+    "pk": 7,
+    "fields": {
+        "starting_point": 1,
+        "stopping_point": "6355b16bc802ef41a85dd5b2",
+        "destination": 2,
+        "country": "Ukraine",
+        "location": "Maidan",
+        "description": "go west",
+        "duration": 5,
+        "route_type": "Car"
+    }
+},
+{
+    "model": "route.event",
+    "pk": 1,
+    "fields": {
+        "id_route": 1,
+        "event_admin": 1,
+        "event_users": "6355b396e31207c1b12e0813",
+        "start_date": "2022-12-25",
+        "price": 1100
+    }
+},
+{
+    "model": "route.event",
+    "pk": 2,
+    "fields": {
+        "id_route": 1,
+        "event_admin": 1,
+        "event_users": "6355b663ecb2d3d9947415bc",
+        "start_date": "2022-10-28",
+        "price": 1000
+    }
+},
+{
+    "model": "route.event",
+    "pk": 3,
+    "fields": {
+        "id_route": 1,
+        "event_admin": 1,
+        "event_users": "6355b6a77e4da2a9d5daf2a2",
+        "start_date": "2023-01-19",
+        "price": 900
+    }
+},
+{
+    "model": "route.event",
+    "pk": 4,
+    "fields": {
+        "id_route": 1,
+        "event_admin": 1,
+        "event_users": "6355b6a9fa660eadc3cbaa90",
+        "start_date": "2024-03-21",
+        "price": 1050
+    }
+},
+{
+    "model": "route.event",
+    "pk": 6,
+    "fields": {
+        "id_route": 3,
+        "event_admin": 1,
+        "event_users": "6355b6abe144556a0dd6ad2e",
+        "start_date": "2022-11-23",
+        "price": 1270
+    }
+},
+{
+    "model": "route.event",
+    "pk": 7,
+    "fields": {
+        "id_route": 4,
+        "event_admin": 1,
+        "event_users": "6355b6add8e4bd7c606503c7",
+        "start_date": "2023-03-10",
+        "price": 1400
+    }
+},
+{
+    "model": "route.event",
+    "pk": 8,
+    "fields": {
+        "id_route": 5,
+        "event_admin": 1,
+        "event_users": "6355b6af42b3fa717ecc3ae1",
+        "start_date": "2023-04-26",
+        "price": 500
+    }
+},
+{
+    "model": "route.event",
+    "pk": 9,
+    "fields": {
+        "id_route": 6,
+        "event_admin": 1,
+        "event_users": "6355b6b0469050d65d84e221",
+        "start_date": "2022-12-15",
+        "price": 2000
+    }
+},
+{
+    "model": "route.event",
+    "pk": 10,
+    "fields": {
+        "id_route": 2,
+        "event_admin": 1,
+        "event_users": "6355b6b240b567f64928ec3e",
+        "start_date": "2022-06-10",
+        "price": 1500
+    }
+},
+{
+    "model": "route.event",
+    "pk": 16,
+    "fields": {
+        "id_route": 4,
+        "event_admin": 1,
+        "event_users": "{}",
+        "start_date": "2022-11-17",
+        "price": 120
+    }
+},
+{
+    "model": "route.review",
+    "pk": 1,
+    "fields": {
+        "route_id": 1,
+        "review_text": "nice",
+        "review_rate": 9
+    }
+},
+{
+    "model": "route.review",
+    "pk": 2,
+    "fields": {
+        "route_id": 4,
+        "review_text": "for so long",
+        "review_rate": 8
+    }
+},
+{
+    "model": "route.review",
+    "pk": 3,
+    "fields": {
+        "route_id": 2,
+        "review_text": "funny",
+        "review_rate": 9
+    }
+},
+{
+    "model": "route.review",
+    "pk": 4,
+    "fields": {
+        "route_id": 3,
+        "review_text": "extreme",
+        "review_rate": 7
+    }
+},
+{
+    "model": "route.review",
+    "pk": 5,
+    "fields": {
+        "route_id": 5,
+        "review_text": "No snack bars.",
+        "review_rate": 5
+    }
+},
+{
+    "model": "route.review",
+    "pk": 6,
+    "fields": {
+        "route_id": 1,
+        "review_text": "great",
+        "review_rate": 6
+    }
+},
+{
+    "model": "route.review",
+    "pk": 7,
+    "fields": {
+        "route_id": 1,
+        "review_text": "",
+        "review_rate": 3
+    }
+},
+{
+    "model": "route.review",
+    "pk": 8,
+    "fields": {
+        "route_id": 2,
+        "review_text": "",
+        "review_rate": 8
+    }
+}
+]
