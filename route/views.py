@@ -139,8 +139,7 @@ def route_info(request):
                                   'Price event': i[2]} for i in result_query_route_event]
 
                 return HttpResponse([select_route, travel_events, '<br><a href="info_event" >SELECT  EVENT</a>',
-                                                                  '<br><a href="add_event" >ADD NEW EVENT</a>'],
-                                    stopping_point)
+                                                                  '<br><a href="add_event" >ADD NEW EVENT</a>'])
 
             else:
                 return HttpResponse([select_route, '<br><a href="add_event" >ADD NEW EVENT</a>'])
